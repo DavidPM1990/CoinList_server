@@ -1,8 +1,26 @@
 const { Schema, model } = require("mongoose");
+const bcrypt = require("bcrypt");
 
-// TODO: Please make sure you edit the User model to whatever makes sense in this case
-const userSchema = new Schema(
+
+const usuarioSchema = new Schema(
   {
+    nombre: {
+      type: String,
+      required: true,
+      trim: true
+    },
+    apellidos: {
+      type: String,
+      required: false,
+      trim: true
+    },
+    token: {
+      type: String
+    },
+    // confirmado: {
+    //   type: Boolean,
+    //   default: false
+    // },
     email: {
       type: String,
       required: [true, 'Email is required.'],
@@ -21,6 +39,19 @@ const userSchema = new Schema(
   }
 );
 
-const User = model("User", userSchema);
+// usuarioSchema.pre("save", async function (next) {
+//   if (!this.isModified("password")) {
+//     next();
+//   }
+//   const salt = await bcrypt.genSalt(10);
+//   this.password = await bcrypt.hash(this.password, salt);
+// });
 
-module.exports = User;
+// usuarioSchema.methods.comprobarPassword = async function (passwordFormulario) {
+//   return await bcrypt.compare(passwordFormulario, this.password);
+// };
+
+
+const Usuario = model("Usuario", usuarioSchema);
+
+module.exports = Usuario;
