@@ -17,7 +17,6 @@ class CoinInfo {
             .catch(e => console.log(e))
     }
 
-
     getOneCoin(id) {
         return this.axios.get(`/coins/${id}`)
             .then((res) => res.data)
