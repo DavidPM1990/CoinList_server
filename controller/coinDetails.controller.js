@@ -20,6 +20,7 @@ const getDetails = (req, res, next) => {
 
         }) => {
             res.send({
+                id,
                 small,
                 name,
                 symbol,

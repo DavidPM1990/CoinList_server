@@ -3,19 +3,23 @@ const router = express.Router();
 const { createUser,
     findProfile,
     updateProfile,
-    // GetUser
+    // getFavCoins,
 } = require('../controller/user.controller');
 const validateToken = require('../middleware/validateToken.middleware');
 
 // ------------------------- GET ---------------------------- 
 
-// router.get('/user', GetUser);
 
 // ------------------------ POST ----------------------------
 
 router.post('/login', findProfile)
 
 router.post('/create', createUser);
+
+// router.get('/favorite-coins/:id', getFavCoins);
+
+
+
 
 router.put("/users/:id", validateToken, updateProfile);
 

@@ -1,4 +1,5 @@
 const Usuario = require('../models/User.model');
+const CoinModel = require("../models/coin.model");
 const bcrypt = require('bcryptjs');
 const { signJwt } = require('../utils/jwt.util');
 const { isValidObjectId } = require('mongoose');
@@ -10,7 +11,7 @@ const createUser = (req, res, next) => {
     Usuario.findOne({ email })
         .then((user) => {
             if (user) {
-                throw new Error('Email ya en uso');
+                throw new Error('This email already have an account.');
             }
             const saltBcrypt = bcrypt.genSaltSync(SALT);
             const hashBcrypt = bcrypt.hashSync(password, saltBcrypt);
@@ -21,7 +22,7 @@ const createUser = (req, res, next) => {
             res.sendStatus(201);
         })
         .catch((err) => {
-            if (err.message === 'Email in use') {
+            if (err.message === 'This email already have an account.') {
                 res.status(400).json({ errorMessage: err.message });
                 return;
             }
@@ -48,6 +49,7 @@ const findProfile = (req, res, next) => {
 const GetUser = (req, res, next) => {
     if (req.user) {
         Usuario.findById(req.user._id)
+            .populate('favoriteCoins')
 
             .then((user) => {
                 if (user) {
@@ -61,12 +63,13 @@ const GetUser = (req, res, next) => {
     }
 }
 
+
 const updateProfile = (req, res, next) => {
     const { email, userName, fullName, phoneNumber } = req.body;
     const userId = req.params['id'];
 
-    console.log('userID:', userId)
-    console.log('req.body:', req.body)
+    // console.log('userID:', userId)
+    // console.log('req.body:', req.body)
 
 
     if (!isValidObjectId(userId)) {
@@ -81,10 +84,70 @@ const updateProfile = (req, res, next) => {
                 res.sendStatus(404);
             }
         })
-        .catch(next);
+        .catch((err) => {
+            res.status(500).json({ errorMessage: 'Internal server error' });
+        });
+};
+
+const getFavCoins = (req, res) => {
+    const { id } = req.params
+
+    if (!isValidObjectId(id)) {
+        return res.status(400).json({ errorMessage: 'Invalid user ID' });
+    }
+
+    Usuario
+        .findById(id)
+        .populate('favoriteCoins')
+        .then((userFavs) => {
+            if (userFavs) {
+                res.status(200).json(userFavs.favoriteCoins);
+            } else {
+                res.sendStatus(404);
+            }
+        })
+        .catch((err) => {
+            res.status(500).json({ errorMessage: 'Internal server error' });
+        });
+}
+
+const updateFavCoins = (req, res, next) => {
+    const { id } = req.params;
+    const { favoriteCoins } = req.body;
+
+    console.log('soy el favoriteCoinsssssssssssssssssss', favoriteCoins)
+
+    Usuario.findByIdAndUpdate(id, { $addToSet: { favoriteCoins: { $each: favoriteCoins } } })
+        .then(() => {
+            res.sendStatus(204);
+        })
+        .catch((err) => {
+            next(err);
+        });
 };
 
 
+const deleteFavCoins = (req, res, next) => {
+    const { id } = req.params;
+    const { favoriteCoins } = req.body;
+
+    Usuario.findByIdAndUpdate(id, { $pull: { favoriteCoins: { $in: favoriteCoins } } })
+        .then(() => {
+            res.sendStatus(204);
+        })
+        .catch((err) => {
+            next(err);
+        });
+};
+
+
+
+
 module.exports = {
-    createUser, findProfile, GetUser, updateProfile
+    createUser, findProfile,
+    GetUser,
+    updateProfile,
+    getFavCoins,
+    updateFavCoins,
+    deleteFavCoins
 }

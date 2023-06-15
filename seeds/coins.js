@@ -3,6 +3,9 @@ const mongoose = require('mongoose');
 const coinModel = require('../models/coin.model');
 const CoinInfo = require('../services/coinApi.service');
 
+const MONGO_URI =
+    process.env.MONGODB_URI || "mongodb://127.0.0.1:27017/backend-coinlist";
+
 mongoose
     .connect(MONGO_URI)
     .then((x) => {
@@ -11,7 +14,7 @@ mongoose
     })
     .then(() => {
         return CoinInfo
-            .getOneCoin(id)
+            .getCoinList()
     })
     .then((data) => {
         return coinModel
